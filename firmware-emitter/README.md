@@ -1,0 +1,4 @@
+
+
+hardware:
+USB VID:PID=1A86:7523 LOCATION=20-1
