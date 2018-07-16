@@ -1,5 +1,6 @@
-// this is the MAC Address of the remote ESP server which receives these sensor readings
-uint8_t remoteMac[] = {0x5E, 0xCF, 0x7F, 0x2C, 0xD9, 0x90};
+extern "C" {
+#include <espnow.h>
+}
 
 #define WIFI_CHANNEL 1
 #define SEND_TIMEOUT 245  // 245 millis seconds timeout 
@@ -14,7 +15,6 @@ struct __attribute__((packed)) COMMAND {
 volatile boolean callbackCalled;
 
 void setupEspNow() {
-  int i=0;
   WiFi.mode(WIFI_STA); // Station mode for esp-now sensor node
   WiFi.disconnect();
 
@@ -48,10 +48,4 @@ void sendSignalToSlave(char commandType, float payload){
   memcpy(bs, &commandData, sizeof(commandData));
   esp_now_send(remoteMac, bs, sizeof(commandData));
   // NULL means send to all peers
-  /*Serial.print("Time to send: ");
-  Serial.print("Overall Time: ");
-  Serial.println(millis() - entry1);*/
-  //  Serial.print("Size: ");
-  //  Serial.println(sizeof(bs));
-  // ESP.deepSleep(0);
 }
