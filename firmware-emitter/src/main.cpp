@@ -33,6 +33,11 @@ int yAxisPin = A0;
 int yAxisValue = 0;
 int prevYAxisValue = 0;
 
+bool invertX = true;
+bool invertY = true;
+
+int xTrim = 29;
+int yTrim = 15;
 
 void changeMux(int c, int b, int a) {
   digitalWrite(MUX_A, a);
@@ -95,17 +100,36 @@ void readJoystickAxes(GeneralMessageFunction xChangeCallback, GeneralMessageFunc
   lastReading = millis ();
 
   prevXAxisValue = xAxisValue;
-  changeMux(LOW, LOW, HIGH); // Value of the sensor connected Option 1 pin of Mux
-  xAxisValue = analogRead(A0); 
+  changeMux(LOW, HIGH, LOW); // Value of the sensor connected Option 2 pin of Mux
+  xAxisValue = analogRead(A0);
   
+  if(invertX){
+    xAxisValue = 1024 - xAxisValue;
+  }
+  // transform and ajust raw values
+  xAxisValue = map(xAxisValue, 0, 1019, 0, 1024);
+  xAxisValue = xAxisValue - 512;
+  xAxisValue = xAxisValue + xTrim;
+  xAxisValue = constrain(xAxisValue, -511, 511);
+
   if(abs(prevXAxisValue-xAxisValue)>2){
     xChangeCallback('x', xAxisValue, prevXAxisValue);
   }
 
+  // now deal with Y axis
   prevYAxisValue = yAxisValue;
-  changeMux(LOW, HIGH, LOW); // Value of the sensor connected Option 2 pin of Mux
+  changeMux(LOW, LOW, HIGH); // Value of the sensor connected Option 1 pin of Mux
+
   yAxisValue = analogRead(A0); 
-  
+  if(invertY){
+    yAxisValue = 1024 - yAxisValue;
+  }
+  // transform and ajust raw values
+  yAxisValue = map(yAxisValue, 0, 1019, 0, 1024);
+  yAxisValue = yAxisValue - 512;
+  yAxisValue = yAxisValue + yTrim;
+  yAxisValue = constrain(yAxisValue, -511, 511);
+  //
   if(abs(prevYAxisValue-yAxisValue)>2){
     yChangeCallback('y', yAxisValue, prevYAxisValue);
   }
@@ -143,7 +167,7 @@ void setup() {
 
 void loop() {
   // 5 => 200 hz
-  if (millis () - lastReading >= 5) // 200 Hz
+  if (millis () - lastReading >= 20) // 200 Hz
   {
     // readJoystickAxes(menuModeXAxisChanged, menuModeYAxisChanged);
     readJoystickAxes(driveModeXAxisChanged, driveModeYAxisChanged);
