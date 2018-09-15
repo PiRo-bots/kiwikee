@@ -1,9 +1,6 @@
 #include <Wire.h>
 #include <WEMOS_Motor.h>
 
-int ledPin = D4;
-bool toggled = 0;
-
 float pwm;
 
 float multiplier = 100.0;
@@ -17,17 +14,19 @@ float x=0.0;
 
 float prevThrottle = 0.0;
 float throttle=0.0;
-float deadZoneThreshold = 6;
+float deadZoneThreshold = 3;
 
 float motorLeftPwm = 0.0;
 float motorRightPwm = 0.0;
 float motorLeftDir = _CW;
-float motorRightDir = _CCW;
+float motorRightDir = _CW; // _CCW; // inverted compared to original firmware
 
-//Motor shiled I2C Address: 0x30
+//Motor shield I2C Address: 0x30
 //PWM frequency: 1000Hz(1kHz)
 Motor *motorLeft = new Motor(0x30,_MOTOR_A, 1000);//Motor Left //NULL;
 Motor *motorRight = new Motor(0x30,_MOTOR_B, 1000);//Motor Right //NULL;
+
+unsigned long lastReading;
 
 
 void setupDrive() {
@@ -35,7 +34,7 @@ void setupDrive() {
   // motorRight = new Motor(0x30,_MOTOR_B, 1000);//Motor Right
 }
 
-void drive(){
+void drive()
 {
     if (millis () - lastReading >= 5)   // 200 Hz
     {
@@ -51,8 +50,8 @@ void drive(){
     prevX = x;
 
     if(throttleChanged || xChanged){
-      float leftAdjuster = 1 - max(float(0), x);
-      float rightAdjuster = 1 - max(float(0), float(0 - x));
+      float leftAdjuster = 1 - max(float(0), float(0 - x));
+      float rightAdjuster = 1 - max(float(0), x);
 
       motorLeftPwm =  throttle * multiplier * leftAdjuster;
       motorRightPwm = throttle * multiplier * rightAdjuster;
@@ -92,9 +91,9 @@ void drive(){
 
       // right motor
       if(motorRightPwm > deadZoneThreshold){
-        motorRightDir = _CW;
-      }else if(motorRightPwm < -deadZoneThreshold){
         motorRightDir = _CCW;
+      }else if(motorRightPwm < -deadZoneThreshold){
+        motorRightDir = _CW;
       }else{
         motorRightPwm = 0.0;
         motorRightPwmFinal = 0.0;
@@ -113,8 +112,8 @@ void drive(){
     }
   }
       
-    }
 }
+
 
 // callback when data is recv from Master
 void OnDataRecvMotor(uint8_t *mac_addr, uint8_t *data, uint8_t len) {
@@ -122,15 +121,6 @@ void OnDataRecvMotor(uint8_t *mac_addr, uint8_t *data, uint8_t len) {
 
   // Serial.printf(" CommandType=%c, Payload=%0.0f%%\n", commandData.commandType, commandData.payload); 
   switch(commandData.commandType){
-    case 'b':
-      toggled = !toggled;
-      if(toggled){
-        analogWrite(ledPin, 1023);
-      }else{
-        analogWrite(ledPin, 0);
-      }
-       // displayFace();
-    break;
     case 'x':
       x = ((float(commandData.payload))/512);
     break;

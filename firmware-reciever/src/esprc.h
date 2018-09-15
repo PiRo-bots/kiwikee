@@ -17,13 +17,16 @@ volatile boolean callbackCalled;
 
 // Init ESP Now with fallback
 void setupEspNow() {
-  if (esp_now_init() == 0) {
+  while(esp_now_init() != 0){
+    if (esp_now_init() == 0) {
     Serial.println("ESPNow Init Success");
   }
   else {
     Serial.println("ESPNow Init Failed");
     ESP.restart();
   }
+  }
+  
 }
 
 

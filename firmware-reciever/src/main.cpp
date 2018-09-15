@@ -3,25 +3,30 @@
   #include "user_interface.h"
   #include <espnow.h>
 }*/
+// unsigned long timeout = millis();
+
 #include "config.h"
 #include "esprc.h"
 #include "ledFace.h"
-
-unsigned long timeout = millis();
-unsigned long lastReading;
-
 #include "drive.h"
+#include "statusLight.h"
+#include "sensor-distance.h"
 
-/*void OnDataRecv(uint8_t *mac_addr, uint8_t *data, uint8_t len) {
-  
-}*/
+// callback when data is recv from Master
+void OnDataRecv(uint8_t *mac_addr, uint8_t *data, uint8_t len) {
+  // memcpy(&commandData, data, sizeof(commandData));
+
+  OnDataRecvStatusLight(mac_addr,  data, len);
+  OnDataRecvMotor(mac_addr,  data, len);
+}
+
+int fooOut = 0;
+
 
 void setup() {
   Serial.begin(115200);
   delay(2000);
   Serial.println("Reciever listening");
-
-  // pinMode(ledPin, OUTPUT);
 
   //Set device in AP mode to begin with
   WiFi.mode(WIFI_AP_STA);
@@ -34,21 +39,32 @@ void setup() {
 
   // Once ESPNow is successfully Init, we will register for recv CB to
   // get recv packer info.
-  esp_now_register_recv_cb(OnDataRecvMotor);
+  esp_now_register_recv_cb(OnDataRecv);
+  // esp_now_register_recv_cb(OnDataRecvStatusLight);
+
 
   delay(2000);
   // setup drive mode
   setupDrive();
   // setup led matrix 'face'
   setupFace();
-
+  // turn the light on, so we now we are turned on
+  setupStatusLight();
+  // 
+  setupDistanceSensor();
   ///
-  // displayFace(0);
+  // pinMode(A0, OUTPUT);
+  // pinMode(D4, OUTPUT);
 }
 
 
 void loop() {
 
   drive();
-  displayFace(throttle);
+  displayFace(throttle, distance);
+  // measureDistance();
+
+  // analogWrite(A0, 255);
+  //analogWrite(D4, 255);
+  //fooOut++;
 }

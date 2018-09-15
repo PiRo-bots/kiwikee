@@ -89,7 +89,7 @@ const int IMAGES_LEN = sizeof(IMAGES)/8;
 int face = 0; // 1 => normal, 2 => too fast
 int prevFace = 0;
 
-void displayFace(float throttle) {
+void displayFace(float throttle, long distance) {
   if (millis () - lastReadingLed >= 300)
   {
     lastReadingLed = millis();
@@ -98,6 +98,9 @@ void displayFace(float throttle) {
     }else{
       face = 0;
     }
+    /* if(distance < 10){
+      face = 2;
+    }*/
 
     if(face != prevFace){
       matrix.clear();
@@ -109,9 +112,14 @@ void displayFace(float throttle) {
         // matrix.drawBitmap(0, 0, zombie, 8, 8, LED_ON);
         matrix.writeDisplay();
 
-      }else if(face ==0){
+      }else if(face == 0){
         Serial.println("switching to normal");
         matrix.drawBitmap(0, 0, blague, 8, 8, LED_ON);
+        //matrix.drawBitmap(0, 0, grogne, 8, 8, LED_ON);
+        matrix.writeDisplay();
+      } else if(face == 2) {
+        Serial.println("switching to grogne");
+        matrix.drawBitmap(0, 0, grogne, 8, 8, LED_ON);
         //matrix.drawBitmap(0, 0, grogne, 8, 8, LED_ON);
         matrix.writeDisplay();
       }
