@@ -9,7 +9,7 @@ void setupDistanceSensor(){
   pinMode(echoPin, INPUT);
 }
 
-void measureDistance() {
+long measureDistance() {
   /*if (millis () - lastReadingDistance >= 300)
   {
   }*/
@@ -27,4 +27,5 @@ void measureDistance() {
   Serial.print(distance);
   Serial.print("cm");
   Serial.println(); */
+  return distance;
 }

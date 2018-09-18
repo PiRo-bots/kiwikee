@@ -12,15 +12,30 @@
 #include "statusLight.h"
 #include "sensor-distance.h"
 
+// robot modes:
+// 0: RC
+// 1: autonomous move around with ultrasonic distance sensor
+int mode = 0;
+
+
+
 // callback when data is recv from Master
 void OnDataRecv(uint8_t *mac_addr, uint8_t *data, uint8_t len) {
-  // memcpy(&commandData, data, sizeof(commandData));
+  memcpy(&commandData, data, sizeof(commandData));
 
-  OnDataRecvStatusLight(mac_addr,  data, len);
-  OnDataRecvMotor(mac_addr,  data, len);
+  switch(commandData.commandType){
+    case 'm':// mode switch
+      mode = int(commandData.payload);
+      if(mode == 1){
+        Serial.println("Switching to atonomous mode");
+      } 
+    break;
+  }
+  if(mode == 0){
+    OnDataRecvStatusLight(mac_addr,  data, len);
+    OnDataRecvMotor(mac_addr,  data, len);
+  }
 }
-
-int fooOut = 0;
 
 
 void setup() {
@@ -57,12 +72,30 @@ void setup() {
   // pinMode(D4, OUTPUT);
 }
 
-
+long lastCheck = millis();
+ 
 void loop() {
 
   drive();
   displayFace(throttle, distance);
   // measureDistance();
+
+  if(mode == 1) {
+     if (millis () - lastCheck >= 100)
+    {
+      lastCheck = millis ();
+      if(measureDistance()<15){
+        Serial.println("too close !");
+        x = -0.8;
+        throttle = - 0.8;
+      }else{
+        Serial.println("all fine !");
+        x = 0;
+        throttle = 0.7;
+      }
+    }
+   
+  }
 
   // analogWrite(A0, 255);
   //analogWrite(D4, 255);
