@@ -132,9 +132,9 @@ const drive = (params) => {
     }) */
   // return track()
   //selectedDrive(params)
-  const baseWheel = translate([50, -35, 5], rotate([90, 25, 0], selectedDrive(30)))
+  const baseWheel = translate([27, -35, 5], rotate([90, 25, 0], selectedDrive(30)))
   const wheel1 = baseWheel
-  const wheel2 = translate([-30, -45, 5], rotate([90, 25, 0], selectedDrive(50)))
+  const wheel2 = translate([-27, -35, 5], rotate([90, 25, 0], selectedDrive(30)))
 
   const wheel3 = mirror([0, 1, 0], wheel1)
   const wheel4 = mirror([0, 1, 0], wheel2)
