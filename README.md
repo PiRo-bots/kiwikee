@@ -43,20 +43,27 @@ you can see the robot in action here :
 
 Robot/Reciever:
 - 3d printed parts
-- electronics
-  - 1 x Wemos D1 Mini
-  - 1 x Wemos D1 Mini Motor Shield
-  - 1 x Custom Pcb (or diy, it is very simple, really)
-  - 2 x LifePo4 3.2v batteries
-  - various headers & wires
+- electronics (total : 78€)
+  - 1 x Wemos D1 Mini (5€)
+  - 1 x Wemos D1 Mini Motor Shield (6€)
+  - 1 x Custom Pcb (or diy, it is very simple, really) (7€)
+  - 2 x LifePo4 3.2v batteries (10€)
+  - 1 x UBEC 5V / buck converter (10€)
+  - 2 x 150:1 MICRO METAL GEARMOTOR HPCB 6V (35€)
+  - various headers & wires, switches, battery holder parts etc (5€)
 
 Emitter (optional):
 - 3d printed parts
-- electronics
-  - 1 x Wemos D1 Mini
-  - 1 x Wemos D1 Mini Oled Shield
-  - 1 x Wemos trippler board
-  - various headers & wires
+- electronics (total : 31€)
+  - 1 x Wemos D1 Mini (5€)
+  - 1 x Wemos D1 Mini Oled Shield (8€)
+  - 1 x Wemos trippler board (2€)
+  - 1 X Joystick (6€)
+  - 1 x LifePo4 3.2v batteries (5€)
+  - various headers & wires, switches, battery holder parts etc (5€)
+
+> note: prices are not the lowest: I tried to go the reliable/ local / higher quality: if you want to go cheaper I 
+am pretty much certain you can get the electronics & motors et for a quarter of tha
 
 ## Usage
 
