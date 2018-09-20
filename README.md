@@ -35,6 +35,10 @@
   - 4 x general IO
   - use grove or standard pins for connectors
 
+you can see the robot in action here :
+
+[![kiwikeeinaction](https://img.youtube.com/vi/v64-LwME9pc/0.jpg)](https://www.youtube.com/watch?v=v64-LwME9pc)
+
 ## Bom
 
 Robot/Reciever:
