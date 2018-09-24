@@ -11,12 +11,13 @@
 #include "drive.h"
 #include "statusLight.h"
 #include "sensor-distance.h"
+#include "actuator-grabber.h"
 
 // robot modes:
 // 0: RC
 // 1: autonomous move around with ultrasonic distance sensor
+// 2: grab (if servo is connecto to pin)
 int mode = 0;
-
 
 
 // callback when data is recv from Master
@@ -25,15 +26,30 @@ void OnDataRecv(uint8_t *mac_addr, uint8_t *data, uint8_t len) {
 
   switch(commandData.commandType){
     case 'm':// mode switch
+      Serial.print('Changing modes to: ');
+      Serial.println(commandData.commandType);
       mode = int(commandData.payload);
       if(mode == 1){
         Serial.println("Switching to atonomous mode");
-      } 
+      }
+      else if (mode ==0 ){
+        x = 0;
+        throttle = 0;
+      }
+      else if (mode == 2){
+        Serial.println("Switching to grab mode");
+      }
     break;
   }
+
   if(mode == 0){
     OnDataRecvStatusLight(mac_addr,  data, len);
     OnDataRecvMotor(mac_addr,  data, len);
+  }
+
+  if(mode == 2){
+    OnDataRecvStatusLight(mac_addr,  data, len);
+    OnDataRecvGrabber(mac_addr,  data, len);
   }
 }
 
@@ -68,6 +84,7 @@ void setup() {
   // 
   setupDistanceSensor();
   ///
+  setupGrabber(D7);
   // pinMode(A0, OUTPUT);
   // pinMode(D4, OUTPUT);
 }
@@ -94,7 +111,6 @@ void loop() {
         throttle = 0.7;
       }
     }
-   
   }
 
   // analogWrite(A0, 255);
