@@ -48,18 +48,25 @@ void drawMenu(){
   display.setTextSize(1);
   display.setTextColor(WHITE);
   display.setCursor(0,0);
-  display.println("HELLO USER");
+  // display.println("HELLO USER");
 
-  display.println("----------");
-  // 
-  for (int i =0; i< 3; i++){
-    if(i == selectedItem){
-      display.setTextColor(BLACK, WHITE); // 'inverted' text
-    }else{
-      display.setTextColor(WHITE, BLACK); // 'inverted' text
-    }
-    display.println(menuItems[i]);
+  // display.println("----------");
+  //
+  if(mode != 'c'){
+    display.println(menuItems[selectedItem]);
   }
+  else{
+    Serial.println("menu");
+    for (unsigned int i =0; i< NUM_MODES ; i++){
+      if(i == selectedItem){
+        display.setTextColor(BLACK, WHITE); // 'inverted' text
+      }else{
+        display.setTextColor(WHITE, BLACK); // 'inverted' text
+      }
+      display.println(menuItems[i]);
+    }
+  }
+  
   /*display.println(3.141592);
   display.setTextSize(2);
   display.setTextColor(WHITE);

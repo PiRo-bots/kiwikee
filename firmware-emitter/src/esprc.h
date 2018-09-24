@@ -35,7 +35,7 @@ void setupEspNow() {
   }
 
   esp_now_register_send_cb([](uint8_t* mac, uint8_t sendStatus) {
-    Serial.printf("send_cb, send done, status = %i\n", sendStatus);
+    // Serial.printf("send_cb, send done, status = %i\n", sendStatus);
     callbackCalled = true;
   });
   callbackCalled = false;

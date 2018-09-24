@@ -1,13 +1,23 @@
 #include <ESP8266WiFi.h>
 
-  String menuItems[3] = { 
+  String menuItems[4] = { 
     "1-ROULE",
-    "2-DANCE",
-    "3-GROGNE"
+    "2-AUTO",
+    "3-GRAB",
+    "4-DANSE"
   };
   int selectedItem = 0;
-  char mode = 'd'; // d => drive
+  char modes[4] = {
+    'r', //rc
+    'a', //auto
+    'g', //grab
+    'd', //dance
+  };
+  char mode = 'r';
+  // r => rc
   // 'c' => config
+
+#define NUM_MODES (unsigned int)(sizeof(menuItems)/sizeof(menuItems[0]))
 
 #include "config.h"
 #include "esprc.h"
@@ -45,33 +55,80 @@ void changeMux(int c, int b, int a) {
   digitalWrite(MUX_C, c);
 }
 
+unsigned long lastButtonReading = millis();
+unsigned long pressTime = 0;
+unsigned long lastButtonInterrupt;
+unsigned int longPressTime = 400;
+
 void joystickButtonPressed(){
-  prevButtonState = buttonState;
-  buttonState = digitalRead(buttonPin);
+  if(millis() - lastButtonInterrupt > 10){ // prevents issues such as https://stackoverflow.com/questions/29756145/arduino-attachinterrupt-seems-to-run-twice
+    prevButtonState = buttonState;
+    buttonState = digitalRead(buttonPin);
+
+    // 0 => down, 1 => up
+    if (buttonState == 1) {
+      // Serial.println("state");
+      // Serial.println(buttonState);
+      unsigned long currentTime = millis();
+      pressTime  = currentTime - lastButtonReading;
+      // Serial.println("pressTime");
+      // Serial.println(pressTime);
+      if(pressTime>longPressTime)
+      {
+        Serial.println("longPress");
+        if(mode != 'c'){
+          mode = 'c';
+        }
+        else{
+          mode = 'r';
+        }
+      }else{
+        Serial.println("shortPress");
+
+        if(mode =='c'){
+          Serial.println(menuItems[selectedItem]);
+          mode = modes[selectedItem];
+          sendSignalToSlave('m', selectedItem); // tell robot to switch modes
+        }else{
+          // trigger action
+          sendSignalToSlave('a', 0); // tell robot to trigger action (mode specific)
+        }
+      }
+    }
+    if(buttonState ==0){
+      lastButtonReading = millis();
+    }
+    lastButtonInterrupt = millis();
+    drawMenu();
+  }
+
   // check if the pushbutton is pressed. If it is, the buttonState is HIGH:
-  if (prevButtonState != buttonState && buttonState != HIGH) {
+  /*if (prevButtonState != buttonState && buttonState != HIGH) {
     Serial.println("pressed");
     sendSignalToSlave('b', 1.0);
-  }
+  }*/
 }
 
 //
 typedef void (*GeneralMessageFunction) (char, float, float);
 
+bool menuChangeDone = false;
 void menuModeYAxisChanged (char command, float value, float prevValue){
-  if(prevValue>value){
-        selectedItem -- ;
+  if(!menuChangeDone){
+     if(prevValue>value && selectedItem + 1 < NUM_MODES){
+      selectedItem ++ ;
     }else{
-      selectedItem ++;
+      if(selectedItem && selectedItem - 1 >= 0 ){
+        selectedItem --;
+      }
     }
     // menu stuff
-    if(selectedItem >2){
-      selectedItem = 0;
-    }
-    if(selectedItem <0){
-      selectedItem = 2;
-    }
     drawMenu();
+    menuChangeDone = true;
+  }
+  if(abs(value) < 10 && prevValue != 0){
+    menuChangeDone = false;
+  }
 }
 
 void menuModeXAxisChanged (char command, float value, float prevValue){
@@ -80,16 +137,16 @@ void menuModeXAxisChanged (char command, float value, float prevValue){
 
 void driveModeXAxisChanged (char command, float value, float prevValue){
   if(abs(prevValue-value)>2){
-      Serial.print("x:  ");
-      Serial.println(value);
+      // Serial.print("x:  ");
+      // Serial.println(value);
       sendSignalToSlave('x', float(value));
   }
 }
 
 void driveModeYAxisChanged (char command, float value, float prevValue){
   if(abs(prevValue-value)>2){
-    Serial.print("y:  ");
-    Serial.println(value);
+    // Serial.print("y:  ");
+    // Serial.println(value);
     sendSignalToSlave('y', float(value));
   }
 }
@@ -167,10 +224,23 @@ void setup() {
 
 void loop() {
   // 5 => 200 hz
-  if (millis () - lastReading >= 20) // 200 Hz
-  {
-    // readJoystickAxes(menuModeXAxisChanged, menuModeYAxisChanged);
-    readJoystickAxes(driveModeXAxisChanged, driveModeYAxisChanged);
-  }
-   
+    if(mode =='c'){// configure
+      if (millis () - lastReading >= 200) 
+      {
+        // menuChangeDone = false;
+        readJoystickAxes(menuModeXAxisChanged, menuModeYAxisChanged);
+      }
+    }
+    else if(mode == 'r'){
+      if (millis () - lastReading >= 20)
+      {
+        readJoystickAxes(driveModeXAxisChanged, driveModeYAxisChanged);
+      }
+    }
+    else if(mode == 'g'){
+      if (millis () - lastReading >= 20)
+      {
+        readJoystickAxes(driveModeXAxisChanged, driveModeYAxisChanged);
+      }
+    }
 }
